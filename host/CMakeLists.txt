@@ -16,5 +16,4 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE pch.hpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED true)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE CXX_FLAGS)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${ImageField})
+target_link_libraries(${PROJECT_NAME} PRIVATE CXX_FLAGS libgl)

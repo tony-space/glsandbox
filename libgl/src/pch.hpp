@@ -1,6 +1,7 @@
 #pragma once
 
-#include <filesystem>
-#include <iostream>
-#include <stdexcept>
+#include <glm.hpp>
+#include <GLFW/glfw3.h>
 
+#include <filesystem>
+#include <stdexcept>

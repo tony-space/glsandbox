@@ -8,4 +8,5 @@ add_subdirectory(ext)
 
 include(cxxflags.cmake)
 
+add_subdirectory(libgl)
 add_subdirectory(host)
