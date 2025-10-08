@@ -7,6 +7,8 @@ static Application* g_appInstance{ nullptr };
 
 static GLFWwindow* createAppWindow()
 {
+	glewInit();
+
 	if (!glfwInit())
 	{
 		throw std::runtime_error("glfw init failed");

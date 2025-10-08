@@ -21,7 +21,9 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch.hpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED true)
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/ext/glew-2.1.0/include)
 target_include_directories(${PROJECT_NAME} PUBLIC "include")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE CXX_FLAGS)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw glm::glm OpenGL::GL OpenGL::GLU)
+
