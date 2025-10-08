@@ -1,6 +1,8 @@
 #include <Application.hpp>
 
 #include <ShaderProgram.hpp>
+#include <BufferObject.hpp>
+#include <Mesh.hpp>
 
 namespace libgl
 {
@@ -54,6 +56,19 @@ void Application::run()
 	auto vs = std::make_shared<VertexShader>(fetchString(m_projectDir / "assets/shaders/blit1.vs.glsl"));
 	auto fs = std::make_shared<FragmentShader>(fetchString(m_projectDir / "assets/shaders/blit1.fs.glsl"));
 	auto program = std::make_shared<ShaderProgram>(std::vector<std::shared_ptr<ShaderBase>>{ vs, fs });
+
+	auto cube = Mesh::cube();
+
+	BufferObject<glm::vec3> positions(BufferTarget::ARRAY_BUFFER);
+	positions.setData(BufferUsage::STATIC_DRAW, cube.positions());
+	BufferObject<glm::vec3> normals(BufferTarget::ARRAY_BUFFER);
+	normals.setData(BufferUsage::STATIC_DRAW, cube.normals());
+	BufferObject<glm::vec2> texCoords0(BufferTarget::ARRAY_BUFFER);
+	texCoords0.setData(BufferUsage::STATIC_DRAW, cube.texCoords0());
+	texCoords0.unbind();
+
+	BufferObject<glm::u16vec3> indices(BufferTarget::ELEMENT_ARRAY_BUFFER);
+	indices.setData(BufferUsage::STATIC_DRAW, cube.triangles());
 
 	while (!glfwWindowShouldClose(m_window))
 	{

@@ -42,7 +42,7 @@ public:
 
 	GLuint nativeHandle() const noexcept { return m_program; }
 
-	[[nodiscard]] void bind() noexcept;
+	void bind() noexcept;
 	void unbind() noexcept;
 
 	template<typename Callable>
