@@ -3,7 +3,9 @@
 namespace libgl
 {
 
-static GLFWwindow* createAppContext()
+static Application* g_appInstance{ nullptr };
+
+static GLFWwindow* createAppWindow()
 {
 	if (!glfwInit())
 	{
@@ -13,10 +15,15 @@ static GLFWwindow* createAppContext()
 	// OpenGL 4.3 includes OpenGL ES 3.0 as a subset
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	if (auto ctx = glfwCreateWindow(1366, 768, "", nullptr, nullptr))
+	if (auto window = glfwCreateWindow(1366, 768, "", nullptr, nullptr))
 	{
-		glfwMakeContextCurrent(ctx);
-		return ctx;
+		glfwMakeContextCurrent(window);
+		glfwSetCursorPosCallback(window, +[](GLFWwindow*, double xpos, double ypos)
+		{
+			g_appInstance->cursorPos(xpos, ypos);
+		});
+
+		return window;
 	}
 
 	throw std::runtime_error("glfw failed to create a window");
@@ -24,9 +31,9 @@ static GLFWwindow* createAppContext()
 
 Application::Application(const std::filesystem::path& projectDir) 
 	: m_projectDir(projectDir)
-	, m_window(createAppContext())
+	, m_window(createAppWindow())
 {
-	
+	g_appInstance = this;
 }
 
 Application::~Application()
@@ -45,6 +52,13 @@ void Application::run()
 
 		glfwPollEvents();
 	}
+}
+
+void Application::cursorPos(double x, double y)
+{
+	(void)x;
+	(void)y;
+	//std::cout << x << ' ' << y << '\n';
 }
 
 //std::vector<std::uint8_t> fetchContent(const std::filesystem::path& path)
