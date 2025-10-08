@@ -55,8 +55,6 @@ void Application::run()
 	auto fs = std::make_shared<FragmentShader>(fetchString(m_projectDir / "assets/shaders/blit1.fs.glsl"));
 	auto program = std::make_shared<ShaderProgram>(std::vector<std::shared_ptr<ShaderBase>>{ vs, fs });
 
-	//std::make_shared<VertexShader>(std::string(vs.so))
-
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT);

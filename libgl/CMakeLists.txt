@@ -6,6 +6,9 @@ find_package(OpenGL REQUIRED)
 
 set(SRC
 	src/Application.cpp
+	src/Mesh.cpp
+	src/MeshCube.cpp
+	src/MeshSphere.cpp
 	src/pch.hpp
 	src/ShaderBase.cpp
 	src/ShaderProgram.cpp
@@ -13,6 +16,7 @@ set(SRC
 	include/Application.hpp
 	include/contracts.hpp
 	include/glm.hpp
+	include/Mesh.hpp
 	include/ShaderBase.hpp
 	include/ShaderProgram.hpp
 )
