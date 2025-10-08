@@ -7,4 +7,5 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/integer.hpp>
 #include <glm/gtc/round.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/component_wise.hpp>

@@ -7,9 +7,14 @@ find_package(OpenGL REQUIRED)
 set(SRC
 	src/Application.cpp
 	src/pch.hpp
+	src/ShaderBase.cpp
+	src/ShaderProgram.cpp
 	
 	include/Application.hpp
+	include/contracts.hpp
 	include/glm.hpp
+	include/ShaderBase.hpp
+	include/ShaderProgram.hpp
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SRC})

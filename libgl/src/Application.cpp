@@ -1,5 +1,7 @@
 #include <Application.hpp>
 
+#include <ShaderProgram.hpp>
+
 namespace libgl
 {
 
@@ -7,8 +9,6 @@ static Application* g_appInstance{ nullptr };
 
 static GLFWwindow* createAppWindow()
 {
-	glewInit();
-
 	if (!glfwInit())
 	{
 		throw std::runtime_error("glfw init failed");
@@ -25,6 +25,11 @@ static GLFWwindow* createAppWindow()
 			g_appInstance->cursorPos(xpos, ypos);
 		});
 
+		if (glewInit() != GLEW_OK)
+		{
+			throw std::runtime_error("glewInit failed");
+		}
+		
 		return window;
 	}
 
@@ -46,6 +51,12 @@ Application::~Application()
 
 void Application::run()
 {
+	auto vs = std::make_shared<VertexShader>(fetchString(m_projectDir / "assets/shaders/blit1.vs.glsl"));
+	auto fs = std::make_shared<FragmentShader>(fetchString(m_projectDir / "assets/shaders/blit1.fs.glsl"));
+	auto program = std::make_shared<ShaderProgram>(std::vector<std::shared_ptr<ShaderBase>>{ vs, fs });
+
+	//std::make_shared<VertexShader>(std::string(vs.so))
+
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -63,18 +74,28 @@ void Application::cursorPos(double x, double y)
 	//std::cout << x << ' ' << y << '\n';
 }
 
-//std::vector<std::uint8_t> fetchContent(const std::filesystem::path& path)
-//{
-//	core::log::info("runtime") << "reading binary content from: " << path.string();
+std::vector<std::uint8_t> Application::fetchContent(const std::filesystem::path& path)
+{
+	std::ifstream stream(path, std::ios_base::binary);
+	assert(!stream.fail());
+	if (stream.fail())
+	{
+		throw std::system_error(std::make_error_code(std::errc::no_such_file_or_directory));
+	}
 
-//	std::ifstream stream(path, std::ios_base::binary);
-//	assert(!stream.fail());
-//	if (stream.fail())
-//	{
-//		throw std::system_error(std::make_error_code(std::errc::no_such_file_or_directory));
-//	}
+	return { std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>() };
+}
 
-//	return { std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>() };
-//}
+std::string Application::fetchString(const std::filesystem::path& path)
+{
+	std::ifstream stream(path, std::ios_base::binary);
+	assert(!stream.fail());
+	if (stream.fail())
+	{
+		throw std::system_error(std::make_error_code(std::errc::no_such_file_or_directory));
+	}
+
+	return { std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>() };
+}
 
 }
