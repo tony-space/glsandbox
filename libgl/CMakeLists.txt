@@ -7,6 +7,7 @@ find_package(OpenGL REQUIRED)
 set(SRC
 	src/Application.cpp
 	src/BufferObject.cpp
+	src/FrameBuffer.cpp
 	src/Mesh.cpp
 	src/MeshCube.cpp
 	src/MeshSphere.cpp
@@ -19,6 +20,7 @@ set(SRC
 	include/Application.hpp
 	include/BufferObject.hpp
 	include/contracts.hpp
+	include/FrameBuffer.hpp
 	include/glm.hpp
 	include/Mesh.hpp
 	include/MutableTexture.hpp

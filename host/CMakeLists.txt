@@ -22,6 +22,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/ext/glew-2.1.0
 target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/ext/glew-2.1.0/lib/Release/x64/glew32s.lib)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/ext/glew-2.1.0/bin/Release/x64/glew32.dll ${CMAKE_CURRENT_BINARY_DIR}/Debug
-COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/ext/glew-2.1.0/bin/Release/x64/glew32.dll ${CMAKE_CURRENT_BINARY_DIR}/Release
+COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/ext/glew-2.1.0/bin/Release/x64/glew32.dll ${CMAKE_CURRENT_BINARY_DIR}/Debug/glew32.dll
+COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/ext/glew-2.1.0/bin/Release/x64/glew32.dll ${CMAKE_CURRENT_BINARY_DIR}/Release/glew32.dll
 )

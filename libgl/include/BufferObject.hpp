@@ -28,23 +28,6 @@ enum class BufferUsage
 	DYNAMIC_COPY = GL_DYNAMIC_COPY
 };
 
-// https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glMapBufferRange.xhtml
-enum class BufferAccessFlags
-{
-	MAP_READ_BIT = GL_MAP_READ_BIT,
-	MAP_WRITE_BIT = GL_MAP_WRITE_BIT,
-
-	MAP_INVALIDATE_RANGE_BIT = GL_MAP_INVALIDATE_RANGE_BIT,
-	MAP_INVALIDATE_BUFFER_BIT = GL_MAP_INVALIDATE_BUFFER_BIT,
-	MAP_FLUSH_EXPLICIT_BIT = GL_MAP_FLUSH_EXPLICIT_BIT,
-	MAP_UNSYNCHRONIZED_BIT = GL_MAP_UNSYNCHRONIZED_BIT,
-};
-
-inline BufferAccessFlags operator| (BufferAccessFlags lhs, BufferAccessFlags rhs)
-{
-	return static_cast<BufferAccessFlags>(static_cast<int>(lhs) | static_cast<int>(rhs));
-}
-
 class BufferObjectBase
 {
 public:
@@ -52,17 +35,14 @@ public:
 
 	BufferObjectBase(BufferTarget target);
 	BufferObjectBase(const BufferObjectBase&) = delete;
-	BufferObjectBase(BufferObjectBase&&) noexcept;
+	BufferObjectBase(BufferObjectBase&&) noexcept = delete;
 	~BufferObjectBase() noexcept;
 
 	BufferObjectBase& operator=(const BufferObjectBase&) = delete;
-	BufferObjectBase& operator=(BufferObjectBase&&) noexcept;
+	BufferObjectBase& operator=(BufferObjectBase&&) noexcept = delete;
 
-	void validateBinding(BufferObjectBase* self) const;
 	void bind();
 	void unbind();
-	
-	static bool supportsMapBufferRange() noexcept;
 protected:
 	GLuint m_buffer = kEmptyHandle;
 	BufferTarget m_target;
