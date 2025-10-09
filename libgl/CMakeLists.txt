@@ -15,6 +15,7 @@ set(SRC
 	src/ShaderBase.cpp
 	src/ShaderProgram.cpp
 	src/TextureBase.cpp
+	src/VertexArrayObject.cpp
 	
 	include/Application.hpp
 	include/BufferObject.hpp
@@ -25,6 +26,7 @@ set(SRC
 	include/ShaderBase.hpp
 	include/ShaderProgram.hpp
 	include/TextureBase.hpp
+	include/VertexArrayObject.hpp
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SRC})
