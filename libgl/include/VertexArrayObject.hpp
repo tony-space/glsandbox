@@ -51,6 +51,15 @@ struct VertexAttribute
 	{
 		setType<GlmVectorType::length(), typename GlmVectorType::value_type>();
 	}
+
+	template <typename GlmVectorType>
+	static VertexAttribute make()
+	{
+		VertexAttribute result;
+		result.setType<GlmVectorType>();
+
+		return result;
+	}
 };
 
 class VertexArrayObject

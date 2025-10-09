@@ -232,4 +232,30 @@ bool ShaderProgram::attachAndCompile(std::vector<std::shared_ptr<ShaderBase>> sh
 	return true;
 }
 
+void ShaderProgram::validateProgram()
+{
+	glValidateProgram(m_program);
+	checkGl();
+
+	GLint validateStatus;
+	glGetProgramiv(m_program, GL_VALIDATE_STATUS, &validateStatus);
+	checkGl();
+
+	if (validateStatus)
+		return;
+
+	GLint validateInfoLogLen;
+	glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &validateInfoLogLen);
+	checkGl();
+
+	if (!validateInfoLogLen)
+		return;
+
+	std::vector<GLchar> rawLog(validateInfoLogLen);
+	glGetProgramInfoLog(m_program, validateInfoLogLen, nullptr, rawLog.data());
+
+	auto message = std::string("Validation failed: ") + std::string(rawLog.cbegin(), rawLog.cend());
+	throw std::runtime_error(message);
+}
+
 }

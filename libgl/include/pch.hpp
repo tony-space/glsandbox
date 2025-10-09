@@ -5,7 +5,11 @@
 #include <GLFW/glfw3.h>
 #include <contracts.hpp>
 
+#include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
+
 #include <cassert>
+#include <chrono>
 #include <cstdint>
 #include <exception>
 #include <filesystem>
