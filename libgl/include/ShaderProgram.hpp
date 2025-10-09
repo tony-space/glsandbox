@@ -2,6 +2,9 @@
 
 #include <ShaderBase.hpp>
 
+#include <glm.hpp>
+#include <string_view>
+
 namespace libgl
 {
 

@@ -6,6 +6,8 @@
 #include <ShaderProgram.hpp>
 #include <VertexArrayObject.hpp>
 
+#include <filesystem>
+
 struct GLFWwindow;
 
 namespace libgl

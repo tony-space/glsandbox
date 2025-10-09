@@ -1,5 +1,7 @@
 #include <MutableTexture.hpp>
 
+#include <cassert>
+
 namespace libgl
 {
 

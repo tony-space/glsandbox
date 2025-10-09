@@ -24,6 +24,7 @@ set(SRC
 	include/glm.hpp
 	include/Mesh.hpp
 	include/MutableTexture.hpp
+	include/opengl.hpp
 	include/pch.hpp
 	include/ShaderBase.hpp
 	include/ShaderProgram.hpp

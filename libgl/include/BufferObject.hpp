@@ -1,5 +1,8 @@
 #pragma once
 
+#include <opengl.hpp>
+#include <glm.hpp>
+
 namespace libgl
 {
 

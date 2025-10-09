@@ -1,5 +1,8 @@
 #include <Application.hpp>
 
+#include <stb/stb_image.h>
+#include <fstream>
+
 namespace libgl
 {
 

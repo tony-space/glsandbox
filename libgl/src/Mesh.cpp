@@ -1,5 +1,8 @@
 #include <Mesh.hpp>
 
+#include <algorithm>
+#include <stdexcept>
+
 namespace libgl
 {
 

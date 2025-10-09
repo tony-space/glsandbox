@@ -1,6 +1,10 @@
 #pragma once
 
-namespace libgl {
+#include <glm.hpp>
+#include <vector>
+
+namespace libgl
+{
 
 class Mesh final
 {

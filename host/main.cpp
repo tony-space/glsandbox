@@ -1,5 +1,7 @@
 #include <Application.hpp>
 
+#include <iostream>
+
 static std::filesystem::path projectDir()
 {
 	for (auto workingDirectory = std::filesystem::current_path(); !workingDirectory.empty(); workingDirectory = workingDirectory.parent_path())

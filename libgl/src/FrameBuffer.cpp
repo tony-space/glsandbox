@@ -1,6 +1,8 @@
 #include <ShaderBase.hpp>
 #include <FrameBuffer.hpp>
 
+#include <cassert>
+
 namespace libgl
 {
 

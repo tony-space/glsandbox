@@ -1,5 +1,10 @@
 #pragma once
 
+#include <opengl.hpp>
+
+#include <string>
+#include <vector>
+
 namespace libgl
 {
 
