@@ -10,17 +10,21 @@ set(SRC
 	src/Mesh.cpp
 	src/MeshCube.cpp
 	src/MeshSphere.cpp
+	src/MutableTexture.cpp
 	src/pch.hpp
 	src/ShaderBase.cpp
 	src/ShaderProgram.cpp
+	src/TextureBase.cpp
 	
 	include/Application.hpp
 	include/BufferObject.hpp
 	include/contracts.hpp
 	include/glm.hpp
 	include/Mesh.hpp
+	include/MutableTexture.hpp
 	include/ShaderBase.hpp
 	include/ShaderProgram.hpp
+	include/TextureBase.hpp
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SRC})
