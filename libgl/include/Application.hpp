@@ -26,7 +26,7 @@ public:
 	static std::string fetchString(const std::filesystem::path& path);
 private:
 	std::filesystem::path m_projectDir;
-	GLFWwindow* m_window;
+	std::shared_ptr<GLFWwindow> m_window;
 
 	struct BufferData
 	{

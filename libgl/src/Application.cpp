@@ -6,18 +6,39 @@
 namespace libgl
 {
 
+#ifdef MACOSX
+static constexpr bool kMacOS = true;
+#else
+static constexpr bool kMacOS = false;
+#endif
+static constexpr int kWidth = 1366;
+static constexpr int kHeight = 768;
+
 static Application* g_appInstance{ nullptr };
 
-static GLFWwindow* createAppWindow()
+static auto createAppWindow()
 {
 	if (!glfwInit())
 	{
 		throw std::runtime_error("glfw init failed");
 	}
 
-	// OpenGL 4.3 includes OpenGL ES 3.0 as a subset
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	if constexpr (kMacOS)
+	{
+		// MacOS supports only GL 4.1 as core profile
+		// 2.1 is compatible with ES 3.0 via Compatibility Profile and some extensions
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	}
+	else
+	{
+		// OpenGL 4.3 includes OpenGL ES 3.0 as a subset
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	}
+	
+	
+	glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_FALSE);
 	glfwWindowHint(GLFW_RED_BITS, 8);
 	glfwWindowHint(GLFW_GREEN_BITS, 8);
 	glfwWindowHint(GLFW_BLUE_BITS, 8);
@@ -27,10 +48,8 @@ static GLFWwindow* createAppWindow()
 	glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
-	static constexpr int kWidth = 1366;
-	static constexpr int kHeight = 768;
 
-	if (auto window = glfwCreateWindow(kWidth, kHeight, "", nullptr, nullptr))
+	if (auto window = glfwCreateWindow(kWidth, kHeight, "glsandbox", nullptr, nullptr))
 	{
 		glfwMakeContextCurrent(window);
 		glfwSwapInterval(1);
@@ -49,7 +68,12 @@ static GLFWwindow* createAppWindow()
 		}
 
 		
-		return window;
+		return std::shared_ptr<GLFWwindow>(window, +[](GLFWwindow* window)
+		{
+			glfwDestroyWindow(window);
+			auto err = glfwGetError(nullptr);
+			assert(err == GLFW_NO_ERROR);
+		});
 	}
 
 	throw std::runtime_error("glfw failed to create a window");
@@ -134,11 +158,12 @@ Application::Application(const std::filesystem::path& projectDir)
 
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	//glEnable(GL_CULL_FACE);
 	checkGl();
 
 	std::pair<int, int> winDim;
-	glfwGetWindowSize(m_window, &winDim.first, &winDim.second);
+	glfwGetWindowSize(m_window.get(), &winDim.first, &winDim.second);
 	resize(winDim.first, winDim.second);
 }
 
@@ -150,12 +175,13 @@ void Application::run()
 	
 	m_texture->bind(0);
 	m_program->setUniform("U_SAMPLER_0", 0);
+	m_program->setUniform("U_LIGHT_DIR_0", glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
 
 	m_program->validateProgram();
 
 	const auto startTime = std::chrono::high_resolution_clock::now();
 
-	while (!glfwWindowShouldClose(m_window))
+	while (!glfwWindowShouldClose(m_window.get()))
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		checkGl();
@@ -175,11 +201,9 @@ void Application::run()
 		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_meshData->indicesCount * 3), GL_UNSIGNED_SHORT, 0);
 		checkGl();
 
-		glfwSwapBuffers(m_window);
+		glfwSwapBuffers(m_window.get());
 		glfwPollEvents();
 	}
-
-	std::exit(0);
 }
 
 void Application::resize(int x, int y)

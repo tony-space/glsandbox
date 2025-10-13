@@ -47,3 +47,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC "include")
 target_link_libraries(${PROJECT_NAME} PRIVATE CXX_FLAGS)
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw glm::glm OpenGL::GL OpenGL::GLU STB)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	target_compile_definitions(${PROJECT_NAME} PUBLIC MACOSX)
+endif()

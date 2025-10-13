@@ -5,7 +5,20 @@ namespace libgl
 
 VertexArrayObject::VertexArrayObject()
 {
-	glGenVertexArrays(1, &m_vao);
+	if (glGenVertexArrays)
+	{
+		glGenVertexArrays(1, &m_vao);
+	}
+#ifdef glGenVertexArraysAPPLE
+	else if (glGenVertexArraysAPPLE)
+	{
+		glGenVertexArraysAPPLE(1, &m_vao);
+	}
+#endif
+	else
+	{
+		std::terminate();
+	}
 	checkGl();
 }
 
@@ -16,11 +29,24 @@ VertexArrayObject::VertexArrayObject(VertexArrayObject&& other) noexcept
 
 VertexArrayObject::~VertexArrayObject()
 {
-	if (m_vao != kEmptyHandle)
+	if (m_vao == kEmptyHandle)
+		return;
+	
+	if (glDeleteVertexArrays)
 	{
 		glDeleteVertexArrays(1, &m_vao);
-		checkGl();
 	}
+#ifdef glDeleteVertexArraysAPPLE
+	else if (glDeleteVertexArraysAPPLE)
+	{
+		glDeleteVertexArraysAPPLE(1, &m_vao);
+	}
+#endif
+	else
+	{
+		std::terminate();
+	}
+	checkGl();
 }
 
 VertexArrayObject& VertexArrayObject::operator= (VertexArrayObject&& other) noexcept
@@ -35,15 +61,40 @@ VertexArrayObject& VertexArrayObject::operator= (VertexArrayObject&& other) noex
 
 void VertexArrayObject::bind()
 {
-	glBindVertexArray(m_vao);
+	if (glBindVertexArray)
+	{
+		glBindVertexArray(m_vao);
+	}
+#ifdef glBindVertexArrayAPPLE
+	else if (glBindVertexArrayAPPLE)
+	{
+		glBindVertexArrayAPPLE(m_vao);
+	}
+#endif
+	else
+	{
+		std::terminate();
+	}
 	checkGl();
 }
 
 void VertexArrayObject::unbind()
 {
-	glBindVertexArray(0);
+	if (glBindVertexArray)
+	{
+		glBindVertexArray(0);
+	}
+#ifdef glBindVertexArrayAPPLE
+	else if (glBindVertexArrayAPPLE)
+	{
+		glBindVertexArrayAPPLE(0);
+	}
+#endif
+	else
+	{
+		std::terminate();
+	}
 	checkGl();
-
 }
 
 void VertexArrayObject::setVertexAttribute(GLint shaderAttributeLocation, const VertexAttribute& info)
@@ -54,7 +105,20 @@ void VertexArrayObject::setVertexAttribute(GLint shaderAttributeLocation, const 
 	glVertexAttribPointer(shaderAttributeLocation, info.components, static_cast<GLenum>(info.type), info.normalized, info.bytesStride, reinterpret_cast<const void*>(info.byteOffset));
 	checkGl();
 
-	glVertexAttribDivisor(shaderAttributeLocation, info.divisor);
+	if (glVertexAttribDivisor)
+	{
+		glVertexAttribDivisor(shaderAttributeLocation, info.divisor);
+	}
+#ifdef glVertexAttribDivisorARB
+	else if (glVertexAttribDivisorARB)
+	{
+		glVertexAttribDivisorARB(shaderAttributeLocation, info.divisor);
+	}
+#endif
+	else
+	{
+		std::terminate();
+	}
 	checkGl();
 }
 
