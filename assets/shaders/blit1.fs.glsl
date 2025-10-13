@@ -12,6 +12,6 @@ void main()
 	vec4 albedo = texture2D(U_SAMPLER_0, V_TEX_COORD_0);
 
 	gl_FragColor
-		= max(0.1, dot(normal, U_LIGHT_DIR_0))
-		* albedo;
+		= vec4(max(0.1, dot(normal, U_LIGHT_DIR_0))
+		* albedo.rgb, albedo.a);
 }

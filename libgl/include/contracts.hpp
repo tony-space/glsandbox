@@ -35,7 +35,11 @@ inline void checkGL(const char* function, const char* file, const int line)
 
 }
 
+#ifdef NDEBUG
+#define checkGl()
+#else
 #define checkGl() libgl::detail::checkGL(__FUNCTION__, __FILE__, __LINE__);
-#define checkGLStatus(STATUS) libgl::detail::checkGLStatus(STATUS, __FUNCTION__, __FILE__, __LINE__);
+#endif // NDEBUG
+
 
 }

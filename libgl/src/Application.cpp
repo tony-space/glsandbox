@@ -71,8 +71,6 @@ static auto createAppWindow()
 		return std::shared_ptr<GLFWwindow>(window, +[](GLFWwindow* window)
 		{
 			glfwDestroyWindow(window);
-			auto err = glfwGetError(nullptr);
-			assert(err == GLFW_NO_ERROR);
 		});
 	}
 
