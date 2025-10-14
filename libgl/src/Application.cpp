@@ -156,8 +156,12 @@ Application::Application(const std::filesystem::path& projectDir)
 
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	//glEnable(GL_CULL_FACE);
+	glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+
+	glEnable(GL_SAMPLE_SHADING);
+	glMinSampleShading(8);
 	checkGl();
 
 	std::pair<int, int> winDim;
@@ -171,8 +175,8 @@ void Application::run()
 	m_vao->bind();
 	m_meshData->indices.bind();
 	
-	m_texture->bind(0);
-	m_program->setUniform("U_SAMPLER_0", 0);
+	//m_texture->bind(0);
+	//m_program->setUniform("U_SAMPLER_0", 0);
 	m_program->setUniform("U_LIGHT_DIR_0", glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
 
 	m_program->validateProgram();
