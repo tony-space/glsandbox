@@ -1,14 +1,14 @@
-#version 110
+#version 410
 
 uniform mat4 U_PROJECTION_TRANSFORM;
 uniform mat4 U_VIEW_TRANSFORM;
 
-attribute vec3 A_POSITION_0;
-attribute vec3 A_NORMAL_0;
-attribute vec2 A_TEX_COORD_0;
+in vec3 A_POSITION_0;
+in vec3 A_NORMAL_0;
+in vec2 A_TEX_COORD_0;
 
-varying vec3 V_NORMAL_0;
-varying vec2 V_TEX_COORD_0;
+out vec3 V_NORMAL_0;
+out vec2 V_TEX_COORD_0;
 
 void main()
 {

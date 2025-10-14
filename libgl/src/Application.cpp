@@ -25,9 +25,7 @@ static auto createAppWindow()
 
 	if constexpr (kMacOS)
 	{
-		// MacOS supports only GL 4.1 as core profile
-		// 2.1 is compatible with ES 3.0 via Compatibility Profile and some extensions
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	}
 	else
@@ -175,8 +173,8 @@ void Application::run()
 	m_vao->bind();
 	m_meshData->indices.bind();
 	
-	//m_texture->bind(0);
-	//m_program->setUniform("U_SAMPLER_0", 0);
+	m_texture->bind(0);
+	m_program->setUniform("U_SAMPLER_0", 0);
 	m_program->setUniform("U_LIGHT_DIR_0", glm::normalize(glm::vec3(1.0f, 0.0f, 1.0f)));
 
 	m_program->validateProgram();
