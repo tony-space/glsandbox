@@ -299,6 +299,15 @@ void ShaderProgram::validateProgram()
 
 std::vector<char> ShaderProgram::binary() const
 {
+	GLint binaryFormats;
+	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &binaryFormats);
+	checkGl();
+
+	if (binaryFormats == 0)
+	{
+		return {};
+	}
+
 	GLint length;
 	glGetProgramiv(m_program, GL_PROGRAM_BINARY_LENGTH, &length);
 	checkGl();
@@ -364,8 +373,10 @@ std::shared_ptr<ShaderProgram> ShaderProgram::make(const std::filesystem::path& 
 		throw std::invalid_argument(program->linkLog());
 	}
 
-	auto binary = program->binary();
-	writeBinary(fileName, binary.cbegin(), binary.cend());
+	if (auto binary = program->binary(); !binary.empty())
+	{
+		writeBinary(fileName, binary.cbegin(), binary.cend());
+	}
 
 	return program;
 }
