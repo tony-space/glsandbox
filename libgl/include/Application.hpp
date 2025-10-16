@@ -20,7 +20,6 @@ public:
 
 	void run();
 	void resize(int x, int y);
-	//void cursorPos(double x, double y);
 
 	static std::vector<std::uint8_t> fetchContent(const std::filesystem::path& path);
 	static std::string fetchString(const std::filesystem::path& path);

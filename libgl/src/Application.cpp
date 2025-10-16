@@ -1,6 +1,7 @@
 #include <Application.hpp>
 
 #include <stb/stb_image.h>
+#include <iostream>
 #include <fstream>
 
 namespace libgl
@@ -11,10 +12,55 @@ static constexpr bool kMacOS = true;
 #else
 static constexpr bool kMacOS = false;
 #endif
+
 static constexpr int kWidth = 1366;
 static constexpr int kHeight = 768;
 
 static Application* g_appInstance{ nullptr };
+
+#ifndef NDEBUG
+static const char* getDebugSource(GLenum source)
+{
+	switch (source)
+	{
+		case GL_DEBUG_SOURCE_API: return "GL_DEBUG_SOURCE_API";
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM: return "GL_DEBUG_SOURCE_WINDOW_SYSTEM";
+		case GL_DEBUG_SOURCE_SHADER_COMPILER: return "GL_DEBUG_SOURCE_SHADER_COMPILER";
+		case GL_DEBUG_SOURCE_THIRD_PARTY: return "GL_DEBUG_SOURCE_THIRD_PARTY";
+		case GL_DEBUG_SOURCE_APPLICATION: return "GL_DEBUG_SOURCE_APPLICATION";
+		case GL_DEBUG_SOURCE_OTHER: return "GL_DEBUG_SOURCE_OTHER";
+	}
+	std::terminate();
+}
+static const char* getDebugType(GLenum type)
+{
+	switch (type)
+	{
+		case GL_DEBUG_TYPE_ERROR: return "GL_DEBUG_TYPE_ERROR";
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR";
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: return "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR";
+		case GL_DEBUG_TYPE_PORTABILITY: return "GL_DEBUG_TYPE_PORTABILITY";
+		case GL_DEBUG_TYPE_PERFORMANCE: return "GL_DEBUG_TYPE_PERFORMANCE";
+		case GL_DEBUG_TYPE_OTHER: return "GL_DEBUG_TYPE_OTHER";
+		case GL_DEBUG_TYPE_MARKER: return "GL_DEBUG_TYPE_MARKER";
+		case GL_DEBUG_TYPE_PUSH_GROUP: return "GL_DEBUG_TYPE_PUSH_GROUP";
+		case GL_DEBUG_TYPE_POP_GROUP: return "GL_DEBUG_TYPE_POP_GROUP";
+	}
+	std::terminate();
+}
+static const char* getDebugSeverity(GLenum severity)
+{
+	switch (severity)
+	{
+		case GL_DEBUG_SEVERITY_HIGH: return "GL_DEBUG_SEVERITY_HIGH";
+		case GL_DEBUG_SEVERITY_MEDIUM: return "GL_DEBUG_SEVERITY_MEDIUM";
+		case GL_DEBUG_SEVERITY_LOW: return "GL_DEBUG_SEVERITY_LOW";
+		case GL_DEBUG_SEVERITY_NOTIFICATION: return "GL_DEBUG_SEVERITY_NOTIFICATION";
+	}
+
+	std::terminate();
+}
+#endif // !NDEBUG
 
 static auto createAppWindow()
 {
@@ -55,16 +101,44 @@ static auto createAppWindow()
 		{
 			g_appInstance->resize(width, height);
 		});
-		//glfwSetCursorPosCallback(window, +[](GLFWwindow*, double xpos, double ypos)
-		//{
-		//	g_appInstance->cursorPos(xpos, ypos);
-		//});
 
 		if (glewInit() != GLEW_OK)
 		{
 			throw std::runtime_error("glewInit failed");
 		}
 
+		std::cout << "" << "OpenGL Vendor: " << glGetString(GL_VENDOR) << '\n';
+		std::cout << "" << "OpenGL Renderer: " << glGetString(GL_RENDERER) << '\n';
+		std::cout << "" << "OpenGL Version: " << glGetString(GL_VERSION) << '\n';
+		std::cout << "" << "OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
+
+#ifndef NDEBUG
+		if (glDebugMessageControl)
+		{
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+			checkGl()
+			glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DEBUG_SOURCE_WINDOW_SYSTEM, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DEBUG_SOURCE_SHADER_COMPILER, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DEBUG_SOURCE_THIRD_PARTY, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DEBUG_SOURCE_OTHER, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+
+			glDebugMessageCallback(+[](GLenum source, GLenum type, GLuint /*id*/,
+				GLenum severity, GLsizei /*length*/,
+				const GLchar* message, const void* /*userParam*/)
+			{
+				std::cout
+					<< '['
+					<< getDebugSource(source) << "] ["
+					<< getDebugType(type) << "] ["
+					<< getDebugSeverity(severity) << "] : "
+					<< message << '\n';
+			}, nullptr);
+		}
+#endif // !NDEBUG
+		
 		
 		return std::shared_ptr<GLFWwindow>(window, +[](GLFWwindow* window)
 		{
@@ -127,6 +201,17 @@ Application::Application(const std::filesystem::path& projectDir)
 	auto fs = std::make_shared<FragmentShader>(fetchString(m_projectDir / "assets/shaders/blit1.fs.glsl"));
 	m_program = std::make_shared<ShaderProgram>(std::vector<std::shared_ptr<ShaderBase>>{ std::move(vs), std::move(fs) });
 
+	glEnable(GL_FRAMEBUFFER_SRGB);
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+
+	glEnable(GL_SAMPLE_SHADING);
+	glMinSampleShading(8);
+	checkGl();
+
+
 	m_vao = std::make_shared<VertexArrayObject>();
 	m_vao->bind();
 
@@ -151,16 +236,6 @@ Application::Application(const std::filesystem::path& projectDir)
 	glTexParameteri((GLenum)m_texture->target(), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri((GLenum)m_texture->target(), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri((GLenum)m_texture->target(), GL_TEXTURE_MAX_ANISOTROPY, 16);
-
-	glEnable(GL_FRAMEBUFFER_SRGB);
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-
-	glEnable(GL_SAMPLE_SHADING);
-	glMinSampleShading(8);
-	checkGl();
 
 	std::pair<int, int> winDim;
 	glfwGetWindowSize(m_window.get(), &winDim.first, &winDim.second);
@@ -213,13 +288,6 @@ void Application::resize(int x, int y)
 
 	m_projMatrix = glm::perspective(glm::radians(60.0f), float(x) / y, 0.01f, 100.0f);
 }
-
-//void Application::cursorPos(double x, double y)
-//{
-//	(void)x;
-//	(void)y;
-//	//std::cout << x << ' ' << y << '\n';
-//}
 
 std::vector<std::uint8_t> Application::fetchContent(const std::filesystem::path& path)
 {
