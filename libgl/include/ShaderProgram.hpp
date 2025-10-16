@@ -4,6 +4,12 @@
 
 #include <glm.hpp>
 #include <string_view>
+#include <vector>
+
+namespace std::filesystem
+{
+class path;
+}
 
 namespace libgl
 {
@@ -11,7 +17,8 @@ namespace libgl
 class ShaderProgram
 {
 public:
-	explicit ShaderProgram(std::vector<std::shared_ptr<ShaderBase>> shaders);
+	explicit ShaderProgram();
+	explicit ShaderProgram(std::shared_ptr<VertexShader>, std::shared_ptr<FragmentShader>);
 	ShaderProgram(const ShaderProgram&) = delete;
 	ShaderProgram(ShaderProgram&&) noexcept = delete;
 	~ShaderProgram();
@@ -49,17 +56,20 @@ public:
 	void unbind() noexcept;
 
 	void validateProgram();
+	std::vector<char> binary() const;
+
+	static std::shared_ptr<ShaderProgram> make(const std::filesystem::path& fragmentPath, const std::filesystem::path& vertexPath);
 private:
 	constexpr static GLuint kInvalidId = (std::numeric_limits<GLuint>::max)();
 	
 	GLuint m_program{ kInvalidId };
 	std::string m_linkLog;
-	std::vector<std::shared_ptr<ShaderBase>> m_shaders;
 
 	mutable std::vector<std::pair<std::string, GLint>> m_uniformLocations;
 	mutable std::vector<std::pair<std::string, GLint>> m_attributeLocations;
 
-	[[nodiscard]] bool attachAndCompile(std::vector<std::shared_ptr<ShaderBase>> shaders);
+	[[nodiscard]] bool attachAndCompile(std::shared_ptr<VertexShader>, std::shared_ptr<FragmentShader>);
+	bool trySetBinary(GLenum format, const void* binary, size_t length);
 };
 
 }

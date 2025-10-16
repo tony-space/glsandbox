@@ -197,9 +197,7 @@ Application::Application(const std::filesystem::path& projectDir)
 {
 	g_appInstance = this;
 
-	auto vs = std::make_shared<VertexShader>(fetchString(m_projectDir / "assets/shaders/blit1.vs.glsl"));
-	auto fs = std::make_shared<FragmentShader>(fetchString(m_projectDir / "assets/shaders/blit1.fs.glsl"));
-	m_program = std::make_shared<ShaderProgram>(std::vector<std::shared_ptr<ShaderBase>>{ std::move(vs), std::move(fs) });
+	m_program = ShaderProgram::make(m_projectDir / "assets/shaders/blit1.vs.glsl", m_projectDir / "assets/shaders/blit1.fs.glsl");
 
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_DEPTH_TEST);
@@ -290,18 +288,6 @@ void Application::resize(int x, int y)
 }
 
 std::vector<std::uint8_t> Application::fetchContent(const std::filesystem::path& path)
-{
-	std::ifstream stream(path, std::ios_base::binary);
-	assert(!stream.fail());
-	if (stream.fail())
-	{
-		throw std::system_error(std::make_error_code(std::errc::no_such_file_or_directory));
-	}
-
-	return { std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>() };
-}
-
-std::string Application::fetchString(const std::filesystem::path& path)
 {
 	std::ifstream stream(path, std::ios_base::binary);
 	assert(!stream.fail());

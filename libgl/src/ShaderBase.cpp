@@ -1,6 +1,7 @@
 #include <ShaderBase.hpp>
 
 #include <cassert>
+#include <vector>
 
 namespace libgl
 {

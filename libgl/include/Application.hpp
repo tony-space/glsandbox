@@ -22,7 +22,6 @@ public:
 	void resize(int x, int y);
 
 	static std::vector<std::uint8_t> fetchContent(const std::filesystem::path& path);
-	static std::string fetchString(const std::filesystem::path& path);
 private:
 	std::filesystem::path m_projectDir;
 	std::shared_ptr<GLFWwindow> m_window;

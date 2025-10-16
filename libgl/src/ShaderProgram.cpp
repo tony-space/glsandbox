@@ -1,15 +1,58 @@
 #include <ShaderProgram.hpp>
 
+#include <fstream>
+#include <filesystem>
 
 namespace libgl
 {
 
-ShaderProgram::ShaderProgram(std::vector<std::shared_ptr<ShaderBase>> shaders)
+static std::string fetchString(const std::filesystem::path& path)
+{
+	std::ifstream stream(path);
+	assert(!stream.fail());
+	if (stream.fail())
+	{
+		throw std::system_error(std::make_error_code(std::errc::no_such_file_or_directory));
+	}
+
+	return { std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>() };
+}
+
+static std::vector<char> fetchBinary(const std::filesystem::path& path)
+{
+	std::ifstream stream(path, std::ios_base::binary);
+	assert(!stream.fail());
+	if (stream.fail())
+	{
+		throw std::system_error(std::make_error_code(std::errc::no_such_file_or_directory));
+	}
+
+	return { std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>() };
+}
+
+template<typename Iterator>
+static void writeBinary(std::filesystem::path path, Iterator begin, Iterator end)
+{
+	std::filesystem::create_directory(path.parent_path());
+	std::ofstream writeStream(path, std::ios_base::binary);
+	assert(!writeStream.fail());
+	if (writeStream.fail())
+	{
+		throw std::system_error(std::make_error_code(std::errc::permission_denied));
+	}
+	
+	std::copy(begin, end, std::ostreambuf_iterator<char>(writeStream));
+}
+
+ShaderProgram::ShaderProgram()
 {
 	m_program = glCreateProgram();
 	checkGl();
+}
 
-	if (!attachAndCompile(std::move(shaders)))
+ShaderProgram::ShaderProgram(std::shared_ptr<VertexShader> vs, std::shared_ptr<FragmentShader> fs) : ShaderProgram()
+{
+	if (!attachAndCompile(std::move(vs), std::move(fs)))
 	{
 		throw std::invalid_argument(linkLog());
 	}
@@ -197,15 +240,15 @@ void ShaderProgram::unbind() noexcept
 	checkGl();
 }
 
-bool ShaderProgram::attachAndCompile(std::vector<std::shared_ptr<ShaderBase>> shaders)
+bool ShaderProgram::attachAndCompile(std::shared_ptr<VertexShader> vs, std::shared_ptr<FragmentShader> fs)
 {
 	std::vector<GLchar> rawLog;
 
-	for (const auto& shader : shaders)
-	{
-		glAttachShader(m_program, shader->nativeHandle());
-		checkGl();
-	}
+	glAttachShader(m_program, vs->nativeHandle());
+	checkGl();
+
+	glAttachShader(m_program, fs->nativeHandle());
+	checkGl();
 
 	glLinkProgram(m_program);
 	checkGl();
@@ -224,12 +267,8 @@ bool ShaderProgram::attachAndCompile(std::vector<std::shared_ptr<ShaderBase>> sh
 	GLint linkStatus;
 	glGetProgramiv(m_program, GL_LINK_STATUS, &linkStatus);
 	checkGl();
-	if (!linkStatus)
-		return false;
 
-	m_shaders = std::move(shaders);
-
-	return true;
+	return linkStatus;
 }
 
 void ShaderProgram::validateProgram()
@@ -256,6 +295,79 @@ void ShaderProgram::validateProgram()
 
 	auto message = std::string("Validation failed: ") + std::string(rawLog.cbegin(), rawLog.cend());
 	throw std::runtime_error(message);
+}
+
+std::vector<char> ShaderProgram::binary() const
+{
+	GLint length;
+	glGetProgramiv(m_program, GL_PROGRAM_BINARY_LENGTH, &length);
+	checkGl();
+
+	std::vector<char> buffer(sizeof(GLenum) + static_cast<size_t>(length));
+
+	GLsizei writtenLength;
+	glGetProgramBinary(
+		m_program,
+		static_cast<GLsizei>(length),
+		&writtenLength,
+		reinterpret_cast<GLenum*>(buffer.data()),
+		buffer.data() + sizeof(GLenum));
+	checkGl();
+
+	return buffer;
+}
+
+bool ShaderProgram::trySetBinary(GLenum format, const void* binary, size_t length)
+{
+	glProgramBinary(m_program, format, binary, static_cast<GLsizei>(length));
+
+	auto status = glGetError();
+	if (status == GL_NO_ERROR)
+	{
+		return true;
+	}
+
+	if (status == GL_INVALID_ENUM)
+	{
+		return false;
+	}
+
+	detail::checkGLStatus(status, __FUNCTION__, __FILE__, __LINE__);
+	std::terminate();
+}
+
+std::shared_ptr<ShaderProgram> ShaderProgram::make(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath)
+{
+	const auto shaderCacheDir = std::filesystem::current_path() / "shader_cache";
+
+	auto vertexSource = fetchString(vertexPath);
+	auto fragmentSource = fetchString(fragmentPath);
+
+	auto programHash = std::hash<std::string>{}(vertexSource) ^ std::hash<std::string>{}(fragmentSource);
+	auto fileName = shaderCacheDir / std::to_string(programHash);
+
+	auto program = std::make_shared<ShaderProgram>();
+
+	if (std::filesystem::exists(fileName))
+	{
+		auto binary = fetchBinary(fileName);
+		if (program->trySetBinary(*reinterpret_cast<GLenum*>(binary.data()), binary.data() + sizeof(GLenum), binary.size() - sizeof(GLenum)))
+		{
+			return program;
+		}
+	}
+
+	auto vs = std::make_shared<VertexShader>(vertexSource);
+	auto fs = std::make_shared<FragmentShader>(fragmentSource);
+	if (!program->attachAndCompile(std::move(vs), std::move(fs)))
+	{
+		throw std::invalid_argument(program->linkLog());
+	}
+
+	auto binary = program->binary();
+	writeBinary(fileName, binary.cbegin(), binary.cend());
+
+	return program;
 }
 
 }
